@@ -1,90 +1,45 @@
-# Home Credit Default Risk Prediction
+# tutorial.ipynb — Home Credit Default Risk
 
-A machine learning project focused on predicting the probability of loan default using customer demographic, financial, and employment-related data.
+## Project overview
 
-## Overview
+This notebook builds a Home Credit loan default risk model and generates probability predictions for the competition submission. Starting from a Logistic Regression validation ROC-AUC of **0.7334**, the work reaches **0.7580 ROC-AUC** with a weighted LightGBM and CatBoost prediction blend on a stratified 30% holdout set.
 
-The objective is to identify customers who are likely to experience difficulties repaying their loans by analyzing historical customer information and developing predictive classification models.
+> The notebook reports ROC-AUC, not classification accuracy. The score above is the local validation result; no external leaderboard score is recorded in the notebook.
 
-**Problem Type:** Binary Classification  
-**Target Variable:** `TARGET`  
-**Evaluation Metric:** ROC-AUC
+## What I built
 
-## Tech Stack
+- Explored the training and test data, inspected missing values, and visualized numeric and categorical feature distributions.
+- Processed selected applicant, loan, bureau inquiry, demographic, and employment features.
+- Engineered financial and affordability ratios, including credit-to-income, annuity-to-income, credit-to-goods, income and credit per family member, income after annualized annuity, estimated repayment duration, and a goods financing gap ratio.
+- Combined the three external risk scores using their mean, product, and standard deviation; also created age and employment-to-age features.
+- Handled missing values using medians, means, sentinel values, and zero filling; encoded categorical values and grouped/one-hot encoded car age.
+- Compared Logistic Regression, Random Forest, LightGBM, and CatBoost using validation ROC-AUC.
+- Used Matplotlib and Seaborn to plot feature distributions.
+- Included Optuna search objectives for LightGBM and CatBoost. The search code is commented out in the notebook, so an executed Optuna result is not reported.
+- Tested prediction blends. The best recorded validation result is a **60% LightGBM + 40% CatBoost** blend.
+- Generated test-set probabilities and saved a submission CSV to `output/submission.csv` when the notebook is run.
 
-- **Language:** Python
-- **Data Analysis:** Pandas, NumPy
-- **Visualization:** Matplotlib, Seaborn
-- **Machine Learning:** Scikit-learn
-- **Boosting Algorithms:** LightGBM, CatBoost
-- **Hyperparameter Optimization:** Optuna
-- **Environment:** Jupyter Notebook / Google Colab
+## Validation results
 
-## Project Workflow
+| Model / blend | Validation ROC-AUC |
+| --- | ---: |
+| Logistic Regression | 0.7334 |
+| Random Forest | 0.7377 |
+| LightGBM | 0.7558 |
+| CatBoost | 0.7559 |
+| 80% LightGBM + 20% Random Forest | 0.7563 |
+| **60% LightGBM + 40% CatBoost** | **0.7580** |
 
-### 1. Data Loading & Exploration
-- Loaded and explored training and testing datasets.
-- Examined feature distributions, data types, and missing values.
-- Identified categorical variables and potential anomalies.
+The increase from the Logistic Regression baseline to the best recorded blend is approximately **0.0246 ROC-AUC points** (about **2.46 percentage points** when expressed on a 0–100 scale).
 
-### 2. Exploratory Data Analysis (EDA)
-- Analyzed target variable distribution and class imbalance.
-- Visualized numerical and categorical features.
-- Investigated outliers in income, credit amounts, and car ownership age.
-- Explored relationships between financial characteristics and loan default risk.
+## Repository contents
 
-### 3. Feature Engineering
-Created additional features to capture meaningful financial and demographic relationships:
+- `tutorial.ipynb` — data exploration, feature engineering, model comparison, blending, and submission generation.
+- `input/train.csv`, `input/test.csv` — competition data expected by the notebook.
+- `output/submission.csv` — generated predictions, created when the final notebook cells run.
 
-- `CREDIT_INCOME_RATIO`
-- `ANNUITY_INCOME_RATIO`
-- `CREDIT_GOODS_RATIO`
-- `INCOME_PER_PERSON`
-- `CREDIT_PER_PERSON`
-- `AGE_YEARS`
-- `EMPLOYED_TO_AGE_RATIO`
-- `EXT_SOURCES_MEAN`
-- `EXT_SOURCES_PROD`
+## Running the notebook
 
-### 4. Data Preprocessing
-- Handled missing values using appropriate imputation strategies.
-- Identified and treated anomalous employment duration values.
-- Applied Label Encoding and Count Encoding to categorical variables.
-- Used One-Hot Encoding for grouped car ownership age.
-- Standardized numerical features using StandardScaler.
+The notebook was written for Google Colab and expects the input files under `input/`. It uses Python libraries including pandas, NumPy, Matplotlib, Seaborn, scikit-learn, LightGBM, CatBoost, and Optuna. Update the setup/path cells if running outside the original Colab/Drive environment, then run the notebook cells in order.
 
-### 5. Model Development
-
-Implemented and experimented with multiple classification algorithms:
-
-- Logistic Regression
-- Random Forest Classifier
-- LightGBM
-- CatBoost
-
-Additional techniques:
-- Optuna-based hyperparameter optimization.
-- Stratified K-Fold cross-validation.
-- Weighted ensemble prediction blending.
-
-### 6. Prediction & Submission
-- Generated probability predictions for the test dataset.
-- Prepared predictions in the required submission format.
-- Exported final predictions as a CSV file.
-
-## Repository Structure
-
-```text
-Home-Credit-Default-Risk/
-│
-├── input/
-│   ├── train.csv
-│   ├── test.csv
-│   └── sample_submission.csv
-│
-├── output/
-│   └── submission.csv
-│
-├── Home_Credit_Default_Risk.ipynb
-│
-└── README.md
+The submission output contains `SK_ID_CURR` and the predicted `TARGET` probability for each test row.
